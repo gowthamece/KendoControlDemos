@@ -8,37 +8,158 @@
 
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/jszip.min.js"></script>
 </head>
 <body>
     <h4>Kenod Grid</h4>
+    <span class='k-primary k-bg-primary k-icon k-i-menu contextMenuIcon'></span>
+    <ul id="contextmenu" class="contextMenuIcon">
+
+        <li id="export">Export</li>
+        <li id="exportWithHeaders">Export with Headers</li>
+
+    </ul>
     <div id="grid"></div>
     <script>
-$("#grid").kendoGrid({
+        $(document).ready(function () {
+            $("#grid").kendoGrid({
 
-  columns: [
-        {
-          field: "name", title: "Name", width: 550, sticky: true, },
-        { field: "age", title: "Age" , width:300},
-        { field: "country", title: "Country", width:500 },
-        {field:"address", title:"Address", width:200}
-  ],
-   toolbar: ["search"],
-  search: {
+                toolbar: ["search"],
+                search: {
                     fields: [
                         { name: "age", operator: "eq" },
                         { name: "name", operator: "contains" },
 
                     ]
-  },
-  dataSource: {
-    data: [
-      { name: "Alexa", age: 29, country:"United States", address:"#123" },
-          { name: "Siri", age: 30, country: "United States", address: "#123"},
-          { name: "Shaaniya", age: 30, country: "India", address: "#123" },
-          
-    ]
-  }
-});
+                },
+                dataSource: {
+                    data: [
+                        { name: "Alexa", age: 29, country: "United States", address: "#123" },
+                        { name: "Siri", age: 30, country: "United States", address: "#123" },
+                        { name: "Shaaniya", age: 30, country: "India", address: "#123" },
+
+                    ]
+                },
+                selectable: "multiple cell",
+                dataBound: onDataBound,
+                change: onChange,
+                navigatable: true,
+                mobile: true,
+                columns: [
+                    {
+                        field: "name", title: "Name", width: 550, sticky: true,
+                    },
+                    { field: "age", title: "Age", width: 300 },
+                    { field: "country", title: "Country", width: 500 },
+                    { field: "address", title: "Address", width: 200 }
+                ],
+            });
+
+            var grid = $("#grid").data("kendoGrid");
+
+            $("#contextmenu").kendoContextMenu({
+                target: ".contextMenuIcon",
+                showOn: "click",
+                direction: "right",
+                alignToAnchor: true,
+                copyAnchorStyles: false,
+                select: function (e) {
+                    var item = e.item.id;
+
+                    switch (item) {
+                        case "copy":
+                            copySelected();
+                            break;
+                        case "copyWithHeaders":
+                            copySelectedWithHeaders();
+                            break;
+                        case "export":
+                            exportSelected();
+                            break;
+                        case "exportWithHeaders":
+                            exportSelectedWithHeaders();
+                            break;
+                        case "exportToChart":
+                            exportToChart();
+                            break;
+                        default:
+                            break;
+                    };
+                }
+            });
+            function onDataBound() {
+                $(".contextMenuIcon").addClass("hidden");
+            }
+            function onChange() {
+                debugger;
+                let selectedRowLength = this.select().length;
+
+                let contextMenuIcon = $(".contextMenuIcon");
+
+                if (selectedRowLength > 0) {
+                    contextMenuIcon.removeClass("hidden");
+                } else {
+                    contextMenuIcon.addClass("hidden");
+                }
+            }
+            function exportSelected() {
+                let selected = grid.select();
+
+                if (selected.length === 0) {
+                    kendo.alert("Please select cells before exporting.");
+                    return;
+                }
+                grid.exportSelectedToExcel(false);
+            }
+            function exportSelectedWithHeaders() {
+                let selected = grid.select();
+
+                if (selected.length === 0) {
+                    kendo.alert("Please select cells before exporting.");
+                    return;
+                }
+
+                grid.exportSelectedToExcel(true);
+            }
+        });
     </script>
+
+    <style>
+        .k-default-v2 .contextMenuIcon {
+            margin-top: 45px;
+        }
+
+     .hidden {
+            display: none;
+        }
+
+        .k-bootstrap-v4 .contextMenuIcon {
+            margin-top: 60px;
+        }
+
+        .k-material-v2 .contextMenuIcon {
+            margin-top: 65px;
+        }
+
+        .contextMenuIcon {
+            position: absolute;
+            right: 20px;
+            margin-top: 32px;
+            font-size: 16px;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 5%;
+            color: white;
+            z-index: 10000;
+        }
+
+        .k-grid tbody tr {
+            line-height: 30px;
+        }
+
+        #contextmenu .k-menu-item {
+            padding: 4px 8px;
+        }
+    </style>
 </body>
 </html>
